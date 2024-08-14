@@ -11,14 +11,18 @@ public class CharacterController : MonoBehaviour
     public Tilemap tilemap;
     [SerializeField] private GameObject characterToMove;
     private PlayerInputActions inputActions;  // Reference to the input actions
-    private Vector3 targetPosition;  // Target position to move the character to
+    private Vector2 targetPosition;  // Target position to move the character to
     private bool isMoving = false;  // Flag to indicate if the character is moving
-    public float moveSpeed = 5f; 
+    public float moveSpeed = 5f;
+
+    private Camera cam;
     // Start is called before the first frame update
     private void Awake()
     {
         inputActions = new PlayerInputActions();  // Instantiate the input actions
+        cam = Camera.main;
     }
+    
     private void OnEnable()
     {
         inputActions.Enable();  // Enable the input actions
@@ -32,11 +36,11 @@ public class CharacterController : MonoBehaviour
     }
     private void OnClick(InputAction.CallbackContext context)
     {
-        Vector3 worldPosition = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());  // Convert mouse position to world position
+        Vector2 worldPosition = cam.ScreenToWorldPoint(Mouse.current.position.ReadValue());  // Convert mouse position to world position
         Vector3Int cellPosition = tilemap.WorldToCell(worldPosition);  // Convert world position to cell position
-        Debug.Log(cellPosition);
         targetPosition = tilemap.GetCellCenterWorld(cellPosition);  // Get the center of the clicked tile
-        isMoving = true;  // Set the movement flag  
+        //isMoving = true;  // Set the movement flag
+        characterToMove.transform.position = targetPosition;
     }
     void Update()
     {
@@ -49,11 +53,8 @@ public class CharacterController : MonoBehaviour
     {
         if (characterToMove)
         {
-            characterToMove.transform.position = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);  // Move the character towards the target position
-            if (characterToMove.transform.position == targetPosition)  // Check if the character has reached the target position
-            {
-                isMoving = false;  // Stop the movement
-            }    
+            characterToMove.transform.position = Vector2.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);  // Move the character towards the target position
+               
         }
         
     }

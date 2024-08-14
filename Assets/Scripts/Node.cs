@@ -10,7 +10,6 @@ public class Node
     public int GCost;
     public int HCost;
     public Node Parent;
-    public float Debug;
     private Color originalColor;
     private Tilemap tilemap;
     public int FCost => GCost + HCost;
@@ -26,6 +25,7 @@ public class Node
     }
     public void SetColor(Color color)
     {
+        tilemap.SetTileFlags(Position, TileFlags.None);
         tilemap.SetColor(Position, color);
     }
 

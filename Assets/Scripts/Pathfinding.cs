@@ -5,14 +5,15 @@ using UnityEngine.Tilemaps;
 public class Pathfinding : MonoBehaviour
 {
     public Tilemap tilemap;
-    public Transform character;
-    public Color pathColor = Color.red;
+    private Transform _character;
+    [SerializeField] private Color pathColor = Color.red;
     private Dictionary<Vector3Int, Node> _nodes = new Dictionary<Vector3Int, Node>();
-    
+    private List<Node> _path;
     private Camera _camera;
     private void Start()
     {
         _camera = Camera.main;
+        _character = this.transform;
         InitializeNodes();
     }
     private void Update()
@@ -22,18 +23,17 @@ public class Pathfinding : MonoBehaviour
 
         if (tilemap.HasTile(cellPos))
         {
-            Vector3Int characterCellPos = tilemap.WorldToCell(character.position);
-            List<Vector3> path = FindPath(characterCellPos, cellPos);
-            if (path != null)
+            Vector3Int characterCellPos = tilemap.WorldToCell(_character.position);
+            _path = FindPath(characterCellPos, cellPos);
+            if (_path != null)
             {
-                HighlightPath(path);
+                HighlightPath(_path);
             }
         }
     }
     private void InitializeNodes()
     {
         BoundsInt bounds = tilemap.cellBounds;
-        TileBase[] allTiles = tilemap.GetTilesBlock(bounds);
 
         for (int x = 0; x < bounds.size.x; x++)
         {
@@ -48,7 +48,7 @@ public class Pathfinding : MonoBehaviour
         }
     }
 
-    public List<Vector3> FindPath(Vector3Int start, Vector3Int goal)
+    private List<Node> FindPath(Vector3Int start, Vector3Int goal)
     {
         if (!_nodes.ContainsKey(start) || !_nodes.ContainsKey(goal))
         {
@@ -107,22 +107,22 @@ public class Pathfinding : MonoBehaviour
         return null;
     }
 
-    private List<Vector3> RetracePath(Node startNode, Node endNode)
+    private List<Node> RetracePath(Node startNode, Node endNode)
     {
-        List<Node> path = new List<Node>();
+        List<Node> pathNodes = new List<Node>();
         Node currentNode = endNode;
 
         while (currentNode != startNode)
         {
-            path.Add(currentNode);
+            pathNodes.Add(currentNode);
             currentNode = currentNode.Parent;
         }
-        path.Reverse();
+        pathNodes.Reverse();
 
-        List<Vector3> waypoints = new List<Vector3>();
-        foreach (Node node in path)
+        List<Node> waypoints = new List<Node>();
+        foreach (Node node in pathNodes)
         {
-            waypoints.Add(tilemap.GetCellCenterWorld(node.Position));
+            waypoints.Add(node);
         }
 
         return waypoints;
@@ -156,20 +156,16 @@ public class Pathfinding : MonoBehaviour
         return dstX + dstY;
     }
 
-    private void HighlightPath(List<Vector3> path)
+    private void HighlightPath(List<Node> pathToHighlight)
     {
         foreach (Node node in _nodes.Values)
         {
             node.ResetColor();
         }
 
-        foreach (Vector3 point in path)
+        foreach (Node node in pathToHighlight)
         {
-            Vector3Int cellPos = tilemap.WorldToCell(point);
-            if (_nodes.ContainsKey(cellPos))
-            {
-                _nodes[cellPos].SetColor(pathColor);
-            }
+            node.SetColor(pathColor);
         }
     }
 }
