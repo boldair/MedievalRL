@@ -14,9 +14,10 @@ public class Node
     private Tilemap tilemap;
     public int FCost => GCost + HCost;
     
-    public Node(Vector3Int position)
+    public Node(Vector3Int position, bool walkable)
     {
         this.Position = position;
+        this.Walkable = walkable;
         this.GCost = 0;
         this.HCost = 0;
         this.Parent = null;
@@ -32,5 +33,12 @@ public class Node
     public void ResetColor()
     {
         tilemap.SetColor(Position, originalColor);
+    }
+    public Vector2 GetCenter()
+    {
+        Vector2 worldPosition = tilemap.CellToWorld(Position);
+        Vector2 tileSize = tilemap.cellSize;
+        Vector2 offset = new Vector2(tileSize.x / 2, tileSize.y / 2);
+        return worldPosition + offset;
     }
 }

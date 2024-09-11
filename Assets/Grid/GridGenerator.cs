@@ -37,9 +37,8 @@ namespace Grid
                     TileBase tile = tilemap.GetTile(position);
 
                     // Create a new Node for the A* algorithm
-                    Node node = new Node(position)
+                    Node node = new Node(position, IsTileWalkable(tile))
                     {
-                        Walkable = IsTileWalkable(tile),
                         GCost = int.MaxValue,
                         HCost = 0,
                         Parent = null
