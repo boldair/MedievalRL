@@ -107,7 +107,19 @@ public class Pathfinding : MonoBehaviour
         return null;
     }
 
-    private List<Node> RetracePath(Node startNode, Node endNode)
+    private bool IsTileAnObstacle(Vector3Int cellPos)
+    {
+        // Check if the tile has a collider from the obstacle layer
+        Collider2D obstacleCollider = Physics2D.OverlapPoint(tilemap.GetCellCenterWorld(cellPos), obstacleLayer);
+        
+        // Check if the tile has any object with a collider, assuming characters have colliders
+        Collider2D characterCollider = Physics2D.OverlapPoint(tilemap.GetCellCenterWorld(cellPos));
+        
+        // If there's an obstacle or a character, consider the tile an obstacle
+        return obstacleCollider != null || (characterCollider != null && characterCollider.transform != character);
+    }
+
+    private List<Vector3> RetracePath(Node startNode, Node endNode)
     {
         List<Node> pathNodes = new List<Node>();
         Node currentNode = endNode;
@@ -127,6 +139,8 @@ public class Pathfinding : MonoBehaviour
 
         return waypoints;
     }
+
+
 
     private List<Node> GetNeighbors(Node node)
     {
