@@ -12,7 +12,6 @@ namespace Grid
     
         public Tilemap tilemap;
 
-        [SerializeField] private GameObject textPrefab;
         public int sizeGrid = 0;
         private Dictionary<Vector3Int, Node> grid;
         // Start is called before the first frame update
@@ -38,19 +37,15 @@ namespace Grid
                     TileBase tile = tilemap.GetTile(position);
 
                     // Create a new Node for the A* algorithm
-                    Node node = new Node(position)
+                    Node node = new Node(position, IsTileWalkable(tile))
                     {
-                        Walkable = IsTileWalkable(tile),
                         GCost = int.MaxValue,
                         HCost = 0,
-                        Debug = Random.Range(0, 50),
                         Parent = null
                     };
                     // Add the node to the grid
                     grid[position] = node;
                     Vector3 worldPosition = tilemap.CellToWorld(position) + tilemap.cellSize / 2;
-                    GameObject textObject = Instantiate(textPrefab, worldPosition, Quaternion.identity, transform);
-                    textObject.GetComponent<TextMeshPro>().text = node.Debug.ToString();
                 }
                 
             }

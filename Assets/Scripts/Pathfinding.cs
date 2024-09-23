@@ -4,52 +4,56 @@ using UnityEngine.Tilemaps;
 
 public class Pathfinding : MonoBehaviour
 {
-    public Tilemap tilemap;
-    public Transform character;
-    public Color pathColor = Color.red;
+    public Tilemap _tilemap;
+    private Transform _character;
+    [SerializeField] private Color pathColor = Color.red;
+    [SerializeField] private int maxWalkingLength = 12;
     private Dictionary<Vector3Int, Node> _nodes = new Dictionary<Vector3Int, Node>();
-    
+    public List<Node> Path { get;  private set; }
+    [SerializeField] private LayerMask obstacleLayer;
     private Camera _camera;
     private void Start()
     {
         _camera = Camera.main;
+        _character = this.transform;
+        _tilemap = GameObject.Find("GroundTM").GetComponent<Tilemap>();
         InitializeNodes();
     }
     private void Update()
     {
         Vector3 mouseWorldPos = _camera.ScreenToWorldPoint(Input.mousePosition);
-        Vector3Int cellPos = tilemap.WorldToCell(mouseWorldPos);
-
-        if (tilemap.HasTile(cellPos))
+        Vector3Int cellPos = _tilemap.WorldToCell(mouseWorldPos);
+        
+        if (_tilemap.HasTile(cellPos))
         {
-            Vector3Int characterCellPos = tilemap.WorldToCell(character.position);
-            List<Vector3> path = FindPath(characterCellPos, cellPos);
-            if (path != null)
+            Path = FindPathToLastValidTile(cellPos);
+            if (Path != null)
             {
-                HighlightPath(path);
+                HighlightPath(Path);
             }
         }
     }
     private void InitializeNodes()
     {
-        BoundsInt bounds = tilemap.cellBounds;
-        TileBase[] allTiles = tilemap.GetTilesBlock(bounds);
+        BoundsInt bounds = _tilemap.cellBounds;
 
         for (int x = 0; x < bounds.size.x; x++)
         {
             for (int y = 0; y < bounds.size.y; y++)
             {
                 Vector3Int cellPosition = new Vector3Int(bounds.x + x, bounds.y + y, 0);
-                if (tilemap.HasTile(cellPosition))
+                if (_tilemap.HasTile(cellPosition))
                 {
-                    _nodes[cellPosition] = new Node(cellPosition);
+                    bool walkable = !IsTileAnObstacle(cellPosition);
+                    _nodes[cellPosition] = new Node(cellPosition, walkable);
                 }
             }
         }
     }
 
-    public List<Vector3> FindPath(Vector3Int start, Vector3Int goal)
+    public List<Node> FindPathToLastValidTile(Vector3Int goal)
     {
+        Vector3Int start = _tilemap.WorldToCell(_character.position);
         if (!_nodes.ContainsKey(start) || !_nodes.ContainsKey(goal))
         {
             return null;
@@ -62,6 +66,8 @@ public class Pathfinding : MonoBehaviour
         Node goalNode = _nodes[goal];
 
         openSet.Add(startNode);
+
+        Node lastValidNode = startNode;
 
         while (openSet.Count > 0)
         {
@@ -77,6 +83,14 @@ public class Pathfinding : MonoBehaviour
             openSet.Remove(currentNode);
             closedSet.Add(currentNode);
 
+            if (!currentNode.Walkable || GetDistance(startNode, currentNode) > maxWalkingLength)
+            {
+                // If we've hit an obstacle or exceeded max distance, return the path to the last valid node
+                return RetracePath(startNode, lastValidNode);
+            }
+
+            lastValidNode = currentNode;
+
             if (currentNode == goalNode)
             {
                 return RetracePath(startNode, goalNode);
@@ -84,7 +98,7 @@ public class Pathfinding : MonoBehaviour
 
             foreach (Node neighbor in GetNeighbors(currentNode))
             {
-                if (closedSet.Contains(neighbor))
+                if (!neighbor.Walkable || closedSet.Contains(neighbor))
                 {
                     continue;
                 }
@@ -104,29 +118,38 @@ public class Pathfinding : MonoBehaviour
             }
         }
 
+        // If we exhaust the openSet without finding a path, return null
         return null;
     }
 
-    private List<Vector3> RetracePath(Node startNode, Node endNode)
+    private bool IsTileAnObstacle(Vector3Int cellPos)
     {
-        List<Node> path = new List<Node>();
+        Tilemap obstaclesTilemap = GameObject.Find("ObstacleTM").GetComponent<Tilemap>();
+        return obstaclesTilemap.HasTile(cellPos);
+    }
+
+    private List<Node> RetracePath(Node startNode, Node endNode)
+    {
+        List<Node> pathNodes = new List<Node>();
         Node currentNode = endNode;
 
         while (currentNode != startNode)
         {
-            path.Add(currentNode);
+            pathNodes.Add(currentNode);
             currentNode = currentNode.Parent;
         }
-        path.Reverse();
+        pathNodes.Reverse();
 
-        List<Vector3> waypoints = new List<Vector3>();
-        foreach (Node node in path)
+        List<Node> waypoints = new List<Node>();
+        foreach (Node node in pathNodes)
         {
-            waypoints.Add(tilemap.GetCellCenterWorld(node.Position));
+            waypoints.Add(node);
         }
 
         return waypoints;
     }
+
+
 
     private List<Node> GetNeighbors(Node node)
     {
@@ -156,20 +179,16 @@ public class Pathfinding : MonoBehaviour
         return dstX + dstY;
     }
 
-    private void HighlightPath(List<Vector3> path)
+    private void HighlightPath(List<Node> pathToHighlight)
     {
         foreach (Node node in _nodes.Values)
         {
             node.ResetColor();
         }
 
-        foreach (Vector3 point in path)
+        foreach (Node node in pathToHighlight)
         {
-            Vector3Int cellPos = tilemap.WorldToCell(point);
-            if (_nodes.ContainsKey(cellPos))
-            {
-                _nodes[cellPos].SetColor(pathColor);
-            }
+            node.SetColor(pathColor);
         }
     }
 }
