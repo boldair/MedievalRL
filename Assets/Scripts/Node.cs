@@ -21,7 +21,7 @@ public class Node
         this.GCost = 0;
         this.HCost = 0;
         this.Parent = null;
-        this.tilemap = GameObject.FindObjectOfType<Tilemap>();
+        this.tilemap = GameObject.Find("GroundTM").GetComponent<Tilemap>();
         this.originalColor = tilemap.GetColor(position);
     }
     public void SetColor(Color color)

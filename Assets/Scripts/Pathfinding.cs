@@ -181,7 +181,6 @@ public class Pathfinding : MonoBehaviour
 
     private void HighlightPath(List<Node> pathToHighlight)
     {
-        Tilemap groundTilemap = _tilemap;
         foreach (Node node in _nodes.Values)
         {
             node.ResetColor();
