@@ -50,9 +50,11 @@
     <Compile Include="Assets\Scripts\Node.cs" />
     <Compile Include="Assets\Cainos\Pixel Art Top Down - Basic\Script\SpriteColorAnimation.cs" />
     <Compile Include="Assets\Cainos\Pixel Art Top Down - Basic\Script\LayerTrigger.cs" />
+    <Compile Include="Assets\Scripts\ScriptableObjects\Ability.cs" />
     <Compile Include="Assets\Scripts\Pathfinding.cs" />
     <Compile Include="Assets\Utils\PlayerInputActions.cs" />
     <Compile Include="Assets\Grid\GridGenerator.cs" />
+    <Compile Include="Assets\Scripts\ScriptableObjects\CharacterData.cs" />
     <Compile Include="Assets\Scripts\CharacterController.cs" />
     <Compile Include="Assets\Cainos\Pixel Art Top Down - Basic\Script\CameraFollow.cs" />
     <Compile Include="Assets\Scripts\CameraController.cs" />
