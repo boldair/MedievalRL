@@ -11,7 +11,7 @@ public class Ability : ScriptableObject
     public GameObject abilityEffect; // The visual effect prefab
     public float effectRadius;
     public int damage;
-
+    public Sprite iconSprite;
     public void Use(GameObject target)
     {
         // To be overridden by specific abilities

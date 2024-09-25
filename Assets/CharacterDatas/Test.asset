@@ -12,9 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4d38f526c655aa4487e18ade2c7550c, type: 3}
   m_Name: Test
   m_EditorClassIdentifier: 
-  maxHP: 100
-  walkingRange: 5
-  attackPower: 10
-  defensePower: 6
+  CharacterName: Artos
+  MaxHp: 100
+  WalkingRange: 6
+  AttackPower: 30
+  DefensePower: 20
+  Race: 0
   abilities:
   - {fileID: 11400000, guid: 173e99b137d779147949fefec85f5004, type: 2}
